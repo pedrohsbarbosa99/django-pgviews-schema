@@ -3,17 +3,17 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Adds first-class support for [PostgreSQL Views][pg-views] in the Django ORM.
-Fork of the original [django-pgviews][django-pgviews] by [mypebble][mypebble] with support for Django 3.2+.
+Fork of the [django-pgviews-redux][django-pgviews-redux] by [mypebble][xelixdev] with support for Django 3.2+ and schema postgres.
 
 [pg-views]: http://www.postgresql.org/docs/9.1/static/sql-createview.html
-[django-pgviews]: https://github.com/mypebble/django-pgviews
-[mypebble]: https://github.com/mypebble
+[django-pgviews-redux]: https://github.com/xelixdev/django-pgviews-redux
+[xelixdev]: https://github.com/xelixdev
 
 ## Installation
 
 Install via pip:
 
-    pip install django-pgviews-redux
+    pip install django-pgviews-schema
 
 Add to installed applications in settings.py:
 
@@ -61,7 +61,7 @@ CREATE VIEW myapp_preferredcustomer AS
 SELECT * FROM myapp_customer WHERE is_preferred = TRUE;
 ```
 
-To create all your views, run ``python manage.py sync_pgviews``
+To create all your views, run `python manage.py sync_pgviews`
 
 You can also specify field names, which will map onto fields in your View:
 
@@ -151,6 +151,8 @@ python manage.py sync_pgviews --force
 
 This will forcibly update any views that conflict with your new SQL.
 
+set DEFAULT_SCHEMA in your settings if the currentSchema postgres is different of "public"
+
 ### Dependencies
 
 You can specify other views you depend on. This ensures the other views are
@@ -217,9 +219,9 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
 
 Postgres 9.4 and up allow materialized views to be refreshed concurrently, without blocking reads, as long as a
 unique index exists on the materialized view. To enable concurrent refresh, specify the name of a column that can be
-used as a unique index on the materialized view. Unique index can be defined on more than one column of a materialized 
-view. Once enabled, passing `concurrently=True` to the model's refresh method will result in postgres performing the 
-refresh concurrently. (Note that the refresh method itself blocks until the refresh is complete; concurrent refresh is 
+used as a unique index on the materialized view. Unique index can be defined on more than one column of a materialized
+view. Once enabled, passing `concurrently=True` to the model's refresh method will result in postgres performing the
+refresh concurrently. (Note that the refresh method itself blocks until the refresh is complete; concurrent refresh is
 most useful when materialized views are updated in another process or thread.)
 
 Example:
@@ -247,7 +249,7 @@ def customer_saved(sender, action=None, instance=None, **kwargs):
 
 #### Indexes
 
-As the materialized view isn't defined through the usual Django model fields, any indexes defined there won't be 
+As the materialized view isn't defined through the usual Django model fields, any indexes defined there won't be
 created on the materialized view. Luckily Django provides a Meta option called `indexes` which can be used to add custom
 indexes to models. `pg_views` supports defining indexes on materialized views using this option.
 
@@ -267,7 +269,7 @@ class PreferredCustomer(pg.MaterializedView):
 
     name = models.CharField(max_length=100)
     post_code = models.CharField(max_length=20, db_index=True)
-    
+
     class Meta:
         managed = False  # don't forget this, otherwise Django will think it's a regular model
         indexes = [
@@ -279,7 +281,7 @@ class PreferredCustomer(pg.MaterializedView):
 
 Materialized views can be created either with or without data. By default, they are created with data, however
 `pg_views` supports creating materialized views without data, by defining `with_data = False` for the
-`pg.MaterializedView` class. Such views then do not support querying until the first 
+`pg.MaterializedView` class. Such views then do not support querying until the first
 refresh (raising `django.db.utils.OperationalError`).
 
 Example:
@@ -306,7 +308,7 @@ checks existing materialized view definition in the database (if the mat. view e
 definition with the one currently defined in your `pg.MaterializedView` subclass. If the definition matches
 exactly, the re-create of materialized view is skipped.
 
-This feature is enabled by setting the `MATERIALIZED_VIEWS_CHECK_SQL_CHANGED` in your Django settings to `True`, 
+This feature is enabled by setting the `MATERIALIZED_VIEWS_CHECK_SQL_CHANGED` in your Django settings to `True`,
 which enables the feature when running `migrate`. The command `sync_pgviews` uses this setting as well,
 however it also has switches `--enable-materialized-views-check-sql-changed` and
 `--disable-materialized-views-check-sql-changed` which override this setting for that command.
@@ -367,23 +369,24 @@ occurred.
 Fired every time a VIEW is synchronised with the database.
 
 Provides args:
-* `sender` - View Class
-* `update` - Whether the view to be updated
-* `force` - Whether `force` was passed
-* `status` - The result of creating the view e.g. `EXISTS`, `FORCE_REQUIRED`
-* `has_changed` - Whether the view had to change
+
+- `sender` - View Class
+- `update` - Whether the view to be updated
+- `force` - Whether `force` was passed
+- `status` - The result of creating the view e.g. `EXISTS`, `FORCE_REQUIRED`
+- `has_changed` - Whether the view had to change
 
 #### `all_views_synced`
 
 Sent after all Postgres VIEWs are synchronised.
 
 Provides args:
-* `sender` - Always `None`
 
+- `sender` - Always `None`
 
 ### Multiple databases
 
-django-pgviews can use multiple databases.  Similar to Django's `migrate`
+django-pgviews can use multiple databases. Similar to Django's `migrate`
 management command, our commands (`clear_pgviews`, `refresh_pgviews`,
 `sync_pgviews`) operate on one database at a time. You can specify which
 database to synchronize by providing the `--database` option. For example:
@@ -398,7 +401,6 @@ database. If you want to interact with multiple databases automatically, you'll
 need to take some additional steps. Please refer to Django's [Automatic database
 routing](https://docs.djangoproject.com/en/3.2/topics/db/multi-db/#automatic-database-routing)
 to pin views to specific databases.
-
 
 ## Django Compatibility
 
