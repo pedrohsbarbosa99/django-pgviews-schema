@@ -12,8 +12,8 @@ else:
 
 
 setup(
-    name="django-pgviews-redux",
-    version="0.9.1",
+    name="django-pgviews-schema",
+    version="0.0.1",
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -21,9 +21,9 @@ setup(
     author_email="git@mikulaspoul.cz",
     license="Public Domain",
     packages=find_packages(),
-    url="https://github.com/xelixdev/django-pgviews-redux",
+    url="https://github.com/pedrohsbarbosa99/django-pgviews-schema",
     classifiers=[
-        "Development Status :: 5 - Production/Stable",
+        "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
