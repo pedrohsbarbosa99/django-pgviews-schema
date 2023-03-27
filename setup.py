@@ -13,7 +13,7 @@ else:
 
 setup(
     name="django-pgviews-schema",
-    version="0.0.1",
+    version="0.0.2",
     description="Create and manage Postgres SQL Views in Django",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
