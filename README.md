@@ -3,11 +3,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Adds first-class support for [PostgreSQL Views][pg-views] in the Django ORM.
-Fork of the original [django-pgviews][django-pgviews] by [mypebble][mypebble] with support for Django 3.2+ and schema postgres.
+Fork of the [django-pgviews-redux][django-pgviews-redux] by [mypebble][xelixdev] with support for Django 3.2+ and schema postgres.
 
 [pg-views]: http://www.postgresql.org/docs/9.1/static/sql-createview.html
-[django-pgviews]: https://github.com/mypebble/django-pgviews
-[mypebble]: https://github.com/mypebble
+[django-pgviews-redux]: https://github.com/xelixdev/django-pgviews-redux
+[xelixdev]: https://github.com/xelixdev
 
 ## Installation
 
