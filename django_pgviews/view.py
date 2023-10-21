@@ -7,15 +7,17 @@ import os
 import re
 
 import django
-import psycopg2
 from django.apps import apps
 from django.conf import settings
 from django.core import exceptions
 from django.db import connections, models, router, transaction
 from django.db.backends.postgresql.schema import DatabaseSchemaEditor
+from django.db.backends.utils import truncate_name
 from django.db.models.query import QuerySet
 
+from django_pgviews.compat import ProgrammingError
 from django_pgviews.db import get_fields_by_name
+
 
 FIELD_SPEC_REGEX = r"^([A-Za-z_][A-Za-z0-9_]*)\." r"([A-Za-z_][A-Za-z0-9_]*)\." r"(\*|(?:[A-Za-z_][A-Za-z0-9_]*))$"
 FIELD_SPEC_RE = re.compile(FIELD_SPEC_REGEX)
@@ -212,7 +214,7 @@ def create_materialized_view(connection, view_cls, check_sql_changed=False):
             query = query[:-1]
 
         if check_sql_changed and view_exists:
-            temp_viewname = view_name + "_temp"
+            temp_viewname = truncate_name(view_name + "_temp", length=63)
             _, temp_vname = _schema_and_name(connection, temp_viewname)
 
             _drop_mat_view(cursor, temp_viewname)
@@ -294,7 +296,7 @@ def create_view(connection, view_name, view_query: ViewSQL, update=True, force=F
                         "CREATE OR REPLACE TEMPORARY VIEW check_conflict AS {0};".format(view_query.query),
                         view_query.params,
                     )
-            except psycopg2.ProgrammingError:
+            except ProgrammingError:
                 force_required = True
             finally:
                 cursor.execute("DROP VIEW IF EXISTS check_conflict;")

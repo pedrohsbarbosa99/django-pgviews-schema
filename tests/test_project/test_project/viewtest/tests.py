@@ -3,30 +3,25 @@
 from contextlib import closing
 from datetime import timedelta
 
-import psycopg2.errors
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.core.management import call_command
-from django.db import connection, connections, DEFAULT_DB_ALIAS
+from django.db import connection, DEFAULT_DB_ALIAS
 from django.db.utils import OperationalError
-from django.db.models import signals
 from django.dispatch import receiver
 from django.test import TestCase
 from django.utils import timezone
 
 from django_pgviews.signals import view_synced, all_views_synced
 from django_pgviews.view import _schema_and_name
-
 from . import models
 from .models import LatestSuperusers
 
-
-@receiver(signals.post_migrate)
-def create_test_schema(sender, app_config, using, **kwargs):
-    command = "CREATE SCHEMA IF NOT EXISTS {};".format("test_schema")
-    with connections[using].cursor() as cursor:
-        cursor.execute(command)
+try:
+    from psycopg.errors import UndefinedTable
+except ImportError:
+    from psycopg2.errors import UndefinedTable
 
 
 def get_list_of_indexes(cursor, cls):
@@ -54,7 +49,7 @@ class ViewTestCase(TestCase):
             cur.execute("""SELECT COUNT(*) FROM pg_matviews WHERE matviewname LIKE 'viewtest_%';""")
 
             (count,) = cur.fetchone()
-            self.assertEqual(count, 4)
+            self.assertEqual(count, 5)
 
             cur.execute("""SELECT COUNT(*) FROM information_schema.views WHERE table_schema = 'test_schema';""")
 
@@ -145,7 +140,7 @@ class ViewTestCase(TestCase):
         with connection.cursor() as cursor:
             cursor.execute("DROP MATERIALIZED VIEW viewtest_materializedrelatedview CASCADE;")
 
-        with self.assertRaises(psycopg2.errors.UndefinedTable):
+        with self.assertRaises(UndefinedTable):
             models.MaterializedRelatedView.refresh()
 
     def test_materialized_view_indexes(self):
@@ -241,7 +236,7 @@ class ViewTestCase(TestCase):
         call_command("sync_pgviews", update=False)
 
         # All views went through syncing
-        self.assertEqual(len(synced_views), 12)
+        self.assertEqual(len(synced_views), 13)
         self.assertEqual(all_views_were_synced[0], True)
         self.assertFalse(expected)
 
