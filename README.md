@@ -2,8 +2,8 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Adds first-class support for [PostgreSQL Views][pg-views] in the Django ORM.
-Fork of the [django-pgviews-redux][django-pgviews-redux] by [mypebble][xelixdev] with support for Django 3.2+ and schema postgres.
+Adds first-class support for [PostgreSQL Views][pg-views] in the Django ORM and custom schema support.
+Fork of the [django-pgviews-redux][django-pgviews-redux] by [xelixdev][xelixdev] with support for Django 3.2+ and schema postgres.
 
 [pg-views]: http://www.postgresql.org/docs/9.1/static/sql-createview.html
 [django-pgviews-redux]: https://github.com/xelixdev/django-pgviews-redux
@@ -141,6 +141,17 @@ This will take all fields on `myapp.Customer` and apply them to
 
 ### Updating Views
 
+**NOTE** You need set `DEFAULT_SCHEMA` in your settings.py to use this feature, example below.
+
+```python
+# settings.py
+...
+DEFAULT_SCHEMA = "your_custom_schema" # default is public if not set
+...
+```
+
+You can also sen ENV variable `PG_DEFAULT_VIEW_SCHEMA` to set the default schema.
+
 Sometimes your models change and you need your Database Views to reflect the new
 data. Updating the View logic is as simple as modifying the underlying SQL and
 running:
@@ -150,8 +161,6 @@ python manage.py sync_pgviews --force
 ```
 
 This will forcibly update any views that conflict with your new SQL.
-
-set DEFAULT_SCHEMA in your settings if the currentSchema postgres is different of "public"
 
 ### Dependencies
 
