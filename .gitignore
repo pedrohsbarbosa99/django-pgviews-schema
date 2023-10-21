@@ -28,6 +28,9 @@ local
 # Sphinx docs
 doc/_build
 
+#mkdocs documentation
+/site
+
 # Installer logs
 pip-log.txt
 
